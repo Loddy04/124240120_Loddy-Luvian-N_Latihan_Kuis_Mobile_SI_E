@@ -24,7 +24,13 @@ import 'detail_screen.dart';
 // Ketika data berubah, kita perlu memanggil setState() agar UI ter-rebuild
 // dan menampilkan data terbaru.
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  // Menerima parameter username dari RootScreen untuk menyapa pengguna di AppBar
+  final String username;
+
+  const HomeScreen({
+    super.key,
+    this.username = 'Loddy Luvian Nugraha',
+  });
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -39,14 +45,14 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // --- APPBAR ---
-      // Widget AppBar menampilkan judul halaman di bagian atas layar.
+      // --- APPBAR (Menyapa username pengguna yang login [10 pts]) ---
       appBar: AppBar(
-        title: const Text(
-          'Menu Resto',
-          style: TextStyle(
+        title: Text(
+          'Halo, ${widget.username}!',
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.white,
+            fontSize: 18,
           ),
         ),
         backgroundColor: Colors.orange.shade700,

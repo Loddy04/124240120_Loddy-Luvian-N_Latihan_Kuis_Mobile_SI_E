@@ -3,28 +3,28 @@
 // PILAR MATERI: Navigation (BottomNavigationBar), State & Data
 // =============================================================================
 // Root Screen bertindak sebagai wadah (shell) yang menampung navigasi tab
-// bawah (BottomNavigationBar) untuk berpindah antara halaman Beranda dan Profil.
-//
-// Konsep yang diterapkan:
-// 1. STATEFUL WIDGET     -> Diperlukan karena tab aktif (_selectedIndex)
-//                           berubah saat user mengetuk item navigasi bawah.
-// 2. BOTTOMNAVIGATIONBAR -> Widget bawaan Flutter untuk navigasi tab di bagian
-//                           bawah layar berbasis indeks (Indexed Navigation).
-// 3. DATA PASSING        -> Menerima data username dari LoginScreen melalui
-//                           constructor, lalu meneruskannya ke ProfileScreen.
+// bawah (BottomNavigationBar) untuk mengakses seluruh variasi soal kuis:
+// - Tab 1: Beranda A (Menu Resto & Hitung Porsi Pesanan)
+// - Tab 2: Beranda B (Kuis Kuliner & Detail + Tombol Kembali)
+// - Tab 3: Profil A (Ganti Avatar Karakter Pokemon via GestureDetector)
+// - Tab 4: Profil B (Ganti Warna Tema Hijau/Biru/Merah/Ungu & Sumpah Kejujuran)
 // =============================================================================
 
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
+import 'food_quiz_screen.dart';
 import 'profile_screen.dart';
+import 'profile_color_screen.dart';
 
 class RootScreen extends StatefulWidget {
-  // Menerima data username dari LoginScreen melalui constructor
+  // Menerima data username & password dari LoginScreen melalui constructor
   final String username;
+  final String password;
 
   const RootScreen({
     super.key,
     this.username = 'Loddy Luvian Nugraha',
+    this.password = '124240120',
   });
 
   @override
@@ -33,13 +33,10 @@ class RootScreen extends StatefulWidget {
 
 class _RootScreenState extends State<RootScreen> {
   // --- STATE: Index Tab Aktif ---
-  // Variabel untuk menyimpan indeks halaman yang sedang aktif.
-  // Indeks 0 = Beranda (HomeScreen)
-  // Indeks 1 = Profil (ProfileScreen)
+  // Menyimpan indeks tab yang sedang aktif (0 s/d 3)
   int _selectedIndex = 0;
 
   // --- METHOD: Ganti Tab ---
-  // Mengubah indeks tab yang dipilih dan memicu rebuild widget via setState().
   void _onTabTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -48,34 +45,60 @@ class _RootScreenState extends State<RootScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // --- DAFTAR HALAMAN ---
-    // List berisi widget halaman yang ditampilkan sesuai tab yang dipilih.
-    // Data username diteruskan ke ProfileScreen melalui constructor.
+    // --- DAFTAR SELURUH HALAMAN VARIASI KUIS ---
     final List<Widget> screens = [
-      const HomeScreen(),
-      ProfileScreen(username: widget.username),
+      // 1. Beranda A: Menu Restoran & Hitung Porsi (Latihan Kuis Resto)
+      HomeScreen(username: widget.username),
+
+      // 2. Beranda B: Kuis Kuliner & Atribut Lengkap (Format Kuis Mobil & Pokemon)
+      FoodQuizScreen(username: widget.username),
+
+      // 3. Profil A: Avatar Karakter Pokemon Victor/Gloria (Kuis Pokemon 25 pts)
+      ProfileScreen(
+        username: widget.username,
+        password: widget.password,
+      ),
+
+      // 4. Profil B: Avatar Hijau & Ganti Warna Tema (Kuis Mobil 35 pts)
+      ProfileColorScreen(
+        username: widget.username,
+        password: widget.password,
+      ),
     ];
 
     return Scaffold(
       // Body menampilkan halaman berdasarkan tab yang sedang aktif
       body: screens[_selectedIndex],
 
-      // --- BOTTOM NAVIGATION BAR (Indexed Navigation) ---
+      // --- BOTTOM NAVIGATION BAR (4 Tab Lengkap) ---
       bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed, // Memastikan 4 tab terlihat rapi
         currentIndex: _selectedIndex,
         onTap: _onTabTapped,
-        selectedItemColor: Colors.orange.shade700,
-        unselectedItemColor: Colors.grey,
+        selectedItemColor: Colors.orange.shade800,
+        unselectedItemColor: Colors.grey.shade600,
+        selectedFontSize: 12,
+        unselectedFontSize: 11,
         items: const [
-          // Item Tab 1: Menu Resto
+          // Tab 1: Menu Resto
           BottomNavigationBarItem(
             icon: Icon(Icons.restaurant_menu),
-            label: 'Menu',
+            label: 'Resto',
           ),
-          // Item Tab 2: Profil Pengguna
+          // Tab 2: Kuis Kuliner
           BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profil',
+            icon: Icon(Icons.quiz),
+            label: 'Kuis',
+          ),
+          // Tab 3: Profil Karakter (Variasi A)
+          BottomNavigationBarItem(
+            icon: Icon(Icons.face),
+            label: 'Karakter',
+          ),
+          // Tab 4: Profil Warna Tema (Variasi B)
+          BottomNavigationBarItem(
+            icon: Icon(Icons.palette),
+            label: 'Tema Warna',
           ),
         ],
       ),

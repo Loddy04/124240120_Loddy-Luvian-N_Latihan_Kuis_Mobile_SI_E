@@ -78,12 +78,16 @@ class _LoginScreenState extends State<LoginScreen> {
       // =========================================================================
       // NAVIGATION: pushReplacement (Materi Modul 4)
       // =========================================================================
-      // Menggantikan halaman Login dengan RootScreen di tumpukan (stack) navigasi.
-      // Setelah masuk, user tidak bisa menekan tombol 'Back' untuk kembali ke login.
+      // Menggantikan halaman Login dengan RootScreen di tumpukan navigasi.
+      // Mengirimkan _correctUsername dan _correctPassword sebagai parameter agar
+      // data Nama dan NIM di Halaman Profil selalu sinkron secara dinamis.
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => RootScreen(username: enteredUsername),
+          builder: (context) => RootScreen(
+            username: _correctUsername,
+            password: _correctPassword,
+          ),
         ),
       );
     } else {
