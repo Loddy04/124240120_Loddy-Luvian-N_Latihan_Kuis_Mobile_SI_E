@@ -1,27 +1,31 @@
 // =============================================================================
 // FILE: screens/profile_screen.dart
-// PILAR MATERI: Widget (StatelessWidget), Layouting
+// PILAR MATERI: Widget (StatelessWidget), Layouting, Navigation (pushAndRemoveUntil)
 // =============================================================================
-// Halaman Profil yang menampilkan informasi identitas pelanggan.
+// Halaman Profil yang menampilkan informasi identitas pelanggan serta tombol
+// Logout untuk keluar dari aplikasi dan kembali ke halaman Login.
 //
 // Konsep yang diterapkan:
-// 1. STATELESS WIDGET -> Halaman ini menggunakan StatelessWidget karena
-//                        kontennya bersifat STATIS (tidak berubah selama
-//                        aplikasi berjalan). Tidak ada data yang dimutasi,
-//                        sehingga tidak perlu setState().
-// 2. WIDGET TREE      -> Scaffold > AppBar + Column > CircleAvatar, Text, Card
-// 3. LAYOUTING        -> Column (vertikal), Row (horizontal), Padding, SizedBox
+// 1. STATELESS WIDGET         -> Halaman ini menggunakan StatelessWidget karena
+//                                datanya bersifat statis dan tidak memerlukan setState().
+// 2. DATA PASSING             -> Menerima parameter 'username' dari RootScreen
+//                                melalui constructor widget.
+// 3. PUSHANDREMOVEUNTIL       -> Navigator.pushAndRemoveUntil() untuk fitur Logout,
+//                                menghapus semua riwayat stack navigasi agar pengguna
+//                                tidak bisa kembali ke halaman utama setelah logout.
 // =============================================================================
 
 import 'package:flutter/material.dart';
+import 'login_screen.dart';
 
-// --- STATELESS WIDGET ---
-// StatelessWidget digunakan ketika sebuah halaman/widget tidak memiliki
-// state internal yang berubah. Semua data yang ditampilkan bersifat tetap
-// (hardcoded atau dari parameter constructor yang tidak berubah).
-// Widget ini hanya memiliki satu method build() tanpa setState().
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+  // Menerima data username hasil passing data dari LoginScreen -> RootScreen
+  final String username;
+
+  const ProfileScreen({
+    super.key,
+    this.username = 'Loddy Luvian Nugraha',
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -40,16 +44,13 @@ class ProfileScreen extends StatelessWidget {
       ),
 
       // --- BODY ---
-      // SingleChildScrollView membungkus konten agar bisa di-scroll
-      // jika konten melebihi tinggi layar (menghindari overflow).
+      // SingleChildScrollView mencegah render overflow saat layar kecil/orientasi berubah
       body: SingleChildScrollView(
         child: Column(
           children: [
             const SizedBox(height: 30),
 
             // --- AVATAR PROFIL ---
-            // CircleAvatar menampilkan gambar atau ikon dalam bentuk lingkaran.
-            // 'radius' mengatur ukuran lingkaran.
             CircleAvatar(
               radius: 55,
               backgroundColor: Colors.orange.shade100,
@@ -61,18 +62,18 @@ class ProfileScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // --- NAMA PELANGGAN ---
-            // Ganti dengan nama lengkap mahasiswa sesuai instruksi soal.
-            const Text(
-              'Loddy Luvian N',
-              style: TextStyle(
+            // --- NAMA PELANGGAN (Dari Parameter Login) ---
+            Text(
+              username,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 4),
 
-            // --- NIM ---
+            // --- NIM MAHASISWA ---
             Text(
               '124240120',
               style: TextStyle(
@@ -80,10 +81,9 @@ class ProfileScreen extends StatelessWidget {
                 color: Colors.grey.shade600,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 8),
 
-            // --- LABEL STATUS ---
-            // Container dengan dekorasi digunakan untuk membuat badge/label.
+            // --- LABEL STATUS PELANGGAN ---
             Container(
               padding: const EdgeInsets.symmetric(
                 horizontal: 16,
@@ -102,38 +102,106 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 28),
 
-            // --- KARTU INFORMASI ---
-            // Card digunakan untuk mengelompokkan informasi terkait
-            // dalam satu kotak dengan efek elevasi (bayangan).
-            // Berikut adalah beberapa kartu info restoran:
-
-            // Kartu 1: Info Menu Resto
+            // --- KARTU INFORMASI RESTORAN (Reusable Widget) ---
             _buildInfoCard(
               icon: Icons.restaurant_menu,
               title: 'Menu Resto',
               subtitle: 'Pesan makanan favorit Anda dari daftar menu.',
             ),
-
-            // Kartu 2: Info Pemesanan
             _buildInfoCard(
               icon: Icons.shopping_cart,
               title: 'Pemesanan',
               subtitle: 'Jumlah dan harga pesanan dihitung otomatis.',
             ),
+            const SizedBox(height: 24),
 
-            const SizedBox(height: 20),
+            // =================================================================
+            // FITUR LOGOUT: pushAndRemoveUntil (Materi Modul 4)
+            // =================================================================
+            // Navigator.pushAndRemoveUntil() menghapus SELURUH riwayat halaman
+            // di dalam stack navigasi (ditandai dengan: (route) => false).
+            // Setelah logout dan dialihkan ke LoginScreen, tombol back HP tidak
+            // akan membawa pengguna kembali ke dalam aplikasi resto.
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    // Tampilkan dialog konfirmasi logout
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext dialogContext) {
+                        return AlertDialog(
+                          title: const Text('Konfirmasi Logout'),
+                          content: const Text('Apakah Anda yakin ingin keluar dari akun?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(dialogContext),
+                              child: const Text('Batal'),
+                            ),
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.pop(dialogContext); // Tutup dialog
+
+                                // Pindah ke LoginScreen dan reset seluruh tumpukan navigasi
+                                Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const LoginScreen(),
+                                  ),
+                                  (route) => false, // Hapus seluruh stack navigasi
+                                );
+
+                                // Berikan notifikasi SnackBar berhasil logout
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Anda telah berhasil logout.'),
+                                    backgroundColor: Colors.blueGrey,
+                                  ),
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red.shade700,
+                                foregroundColor: Colors.white,
+                              ),
+                              child: const Text('Logout'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                  icon: const Icon(Icons.logout, color: Colors.white),
+                  label: const Text(
+                    'Logout',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red.shade600,
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 30),
           ],
         ),
       ),
     );
   }
 
-  // --- HELPER METHOD ---
-  // Method pembantu untuk membuat kartu info yang konsisten.
-  // Ini menerapkan prinsip REUSABLE WIDGET: satu template widget yang
-  // bisa dipanggil berulang kali dengan data yang berbeda.
+  // --- HELPER METHOD: Reusable Card ---
   Widget _buildInfoCard({
     required IconData icon,
     required String title,
@@ -147,8 +215,6 @@ class ProfileScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
         ),
         child: ListTile(
-          // ListTile adalah widget bawaan yang menyusun leading, title,
-          // dan subtitle secara otomatis dalam layout standar Material.
           leading: CircleAvatar(
             backgroundColor: Colors.orange.shade50,
             child: Icon(icon, color: Colors.orange.shade700),
